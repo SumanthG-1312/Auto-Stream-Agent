@@ -59,7 +59,7 @@ autostream-agent/
 
 ---
 
-## 🏗️ Architecture Explanation (~200 words)
+## 🏗️ Architecture Explanation 
 
 ### Why LangGraph?
 
