@@ -37,18 +37,29 @@ llm = ChatGoogleGenerativeAI(
     temperature=0.1,  # Lower temperature for more consistent "fine-tuned" like behavior
 )
 
+_LLM_CACHE = {}
+
 def llm_invoke_with_retry(messages, max_retries=3):
-    """Wrapper to handle 429 errors with simple backoff."""
+    """Wrapper to handle 429 errors with simple backoff and caching."""
     import time
     from google.api_core import exceptions
     
+    # 1. Cache responses to avoid redundant LLM calls
+    # Convert message objects to a string representation for caching
+    cache_key = str([getattr(m, 'content', str(m)) for m in messages])
+    if cache_key in _LLM_CACHE:
+        return _LLM_CACHE[cache_key]
+    
     for i in range(max_retries):
         try:
-            return llm.invoke(messages)
+            response = llm.invoke(messages)
+            _LLM_CACHE[cache_key] = response  # Store in cache
+            return response
         except exceptions.ResourceExhausted as e:
             if i == max_retries - 1:
                 raise e
-            wait_time = (i + 1) * 2
+            # 2. Wait 40s before next request on quota hit
+            wait_time = 40
             print(f"⚠️ Quota hit. Retrying in {wait_time}s...")
             time.sleep(wait_time)
         except Exception as e:
