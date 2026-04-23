@@ -1,0 +1,7 @@
+langchain==0.3.25
+langchain-google-genai==2.1.4
+langchain-community==0.3.24
+langgraph==0.4.1
+rank_bm25==0.2.2
+google-generativeai==0.8.4
+python-dotenv==1.1.0
